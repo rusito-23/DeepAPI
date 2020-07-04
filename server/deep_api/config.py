@@ -18,7 +18,13 @@ from flask import Flask as BaseFlask, Config as BaseConfig
 from utils.exception import ConfigError
 
 
-class CFG:
+class CfgNode:
+    """ Configuration Node. """
+    def __init__(self, d):
+        self.__dict__.update(d)
+
+
+class CFG(CfgNode):
     """ Configuration Class """
     levels = {
         'DEVELOPMENT': 'DEBUG',
@@ -28,8 +34,19 @@ class CFG:
     def __init__(self, config_file='./support/config.yaml'):
         # read config
         cfg = self._read_config(config_file)
-        self.__dict__.update(cfg)
+
+        # load general config
+        super(CFG, self).__init__(cfg['GENERAL'])
         self.LEVEL = self.levels[self.FLASK_ENV]
+
+        # load env config
+        self.ENV_CONFIG = cfg['ENV_CONFIG'][self.FLASK_ENV]
+
+        # load model config
+        self.MODEL = CfgNode(cfg['MODEL'])
+
+        # setup log config
+        self.LOG = cfg['LOG']
 
         # create output folder
         if not os.path.isdir(self.OUTPUT_FOLDER):
@@ -50,9 +67,8 @@ class Config(BaseConfig):
 
     def from_cfg(self, cfg):
         self['ENV'] = cfg.FLASK_ENV.lower()
-        c = cfg.ENVS[self['ENV'].upper()]
-        for key in c:
-            self[key] = c[key]
+        for key in cfg.ENV_CONFIG:
+            self[key] = cfg.ENV_CONFIG[key]
 
 
 class Flask(BaseFlask):

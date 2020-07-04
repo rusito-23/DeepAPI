@@ -14,7 +14,8 @@ def create_blueprint(cfg):
     """ setup """
 
     bp = Blueprint('background', cfg.NAME)
-    deep_dream = DeepDream(loi=cfg.LOI, weights_path=cfg.WEIGHTS_PATH)
+    deep_dream = DeepDream(loi=cfg.MODEL.LOI,
+                           weights_path=cfg.MODEL.WEIGHTS_PATH)
 
     """ routes """
 
@@ -25,7 +26,7 @@ def create_blueprint(cfg):
         image = Image.open(io.BytesIO(image.read()))
 
         # process
-        result = deep_dream(image)
+        result = image
         result = to_base64(result)
 
         # build response

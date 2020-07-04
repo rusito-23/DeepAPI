@@ -1,9 +1,10 @@
 
-NAME: ITT 
-FLASK_ENV: DEVELOPMENT 
-OUTPUT_FOLDER: ./out
+GENERAL:
+    NAME: DEEP_API
+    FLASK_ENV: DEVELOPMENT 
+    OUTPUT_FOLDER: ./out
 
-ENVS:
+ENV_CONFIG:
     COMMON: &common
         DEBUG: True
         DEVELOPMENT: True
@@ -19,5 +20,27 @@ ENVS:
         DEVELOPMENT: False
         SECRET_KEY: very_fckn_secure 
 
-WEIGHTS_PATH: ./model/inception_v3_weights.pth
-LOI: [Mixed_5b, Mixed_6b]
+MODEL:
+    WEIGHTS_PATH: ./model/inception_v3_weights.pth
+    LOI: [Mixed_5b, Mixed_6b]
+
+LOG:
+    version: 1
+    disable_existing_loggers: True
+    formatters:
+        standard:
+            format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    handlers:
+        console_handler:
+            formatter: standard
+            level: DEBUG
+            class: 'logging.StreamHandler'
+            stream: 'ext://sys.stdout'
+        file_handler:
+            formatter: standard
+            level: INFO
+            class: 'logging.handlers.RotatingFileHandler'
+            filename: './out/deep_api.log'
+    loggers:
+        '':
+            handlers: [console_handler, file_handler] 
