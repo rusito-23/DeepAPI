@@ -1,21 +1,23 @@
 
 NAME: ITT 
-FLASK_ENV: DEBUG
+FLASK_ENV: DEVELOPMENT 
 OUTPUT_FOLDER: ./out
 
-SERVER:
-    CONFIG:
-        COMMON: &common
-            DEBUG: True
-            DEVELOPMENT: True
-            SECRET_KEY: insecure
-        DEVELOPMENT: &development
-            <<: *common
-        STAGING: &staging
-            DEBUG: False
-            <<: *common
-        PRODUCTION: &production
-            <<: *common
-            DEBUG: False
-            DEVELOPMENT: False
-            SECRET_KEY: very_fckn_secure 
+ENVS:
+    COMMON: &common
+        DEBUG: True
+        DEVELOPMENT: True
+        SECRET_KEY: insecure
+    DEVELOPMENT: &development
+        <<: *common
+    STAGING: &staging
+        DEBUG: False
+        <<: *common
+    PRODUCTION: &production
+        <<: *common
+        DEBUG: False
+        DEVELOPMENT: False
+        SECRET_KEY: very_fckn_secure 
+
+WEIGHTS_PATH: ./model/inception_v3_weights.pth
+LOI: [Mixed_5b, Mixed_6b]

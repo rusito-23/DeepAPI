@@ -17,7 +17,7 @@ def create_app():
 
     cfg = CFG()
     config_logger(cfg)
-    logger = logging.getLogger('ITT')
+    logger = logging.getLogger(cfg.NAME)
 
     """ create app """
 

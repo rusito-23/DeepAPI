@@ -21,18 +21,15 @@ from utils.exception import ConfigError
 class CFG:
     """ Configuration Class """
     levels = {
-        'DEBUG': 'DEBUG',
+        'DEVELOPMENT': 'DEBUG',
         'STAGING': 'INFO',
         'PRODUCTION': 'WARNING'}
 
     def __init__(self, config_file='./support/config.yaml'):
         # read config
         cfg = self._read_config(config_file)
-        self.NAME = cfg['NAME']
-        self.ENV = cfg['FLASK_ENV']
-        self.LEVEL = self.levels[self.ENV]
-        self.SERVER_CONFIG = cfg['SERVER']['CONFIG']
-        self.OUTPUT_FOLDER = cfg['OUTPUT_FOLDER']
+        self.__dict__.update(cfg)
+        self.LEVEL = self.levels[self.FLASK_ENV]
 
         # create output folder
         if not os.path.isdir(self.OUTPUT_FOLDER):
@@ -52,10 +49,10 @@ class Config(BaseConfig):
     """ Flask config enhanced - `from_cfg` method. """
 
     def from_cfg(self, cfg):
-        self['ENV'] = cfg.ENV.lower()
-        for key in cfg.SERVER_CONFIG:
-            if key.isupper():
-                self[key] = cfg.SERVER_CONFIG[key]
+        self['ENV'] = cfg.FLASK_ENV.lower()
+        c = cfg.ENVS[self['ENV'].upper()]
+        for key in c:
+            self[key] = c[key]
 
 
 class Flask(BaseFlask):

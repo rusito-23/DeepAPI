@@ -2,6 +2,7 @@
 Deep Dream Base Model extending the InceptionV3 Pretrained Model.
 """
 
+import torch
 import torchvision
 
 
@@ -21,7 +22,8 @@ class DeepInception3(torchvision.models.Inception3):
         super(DeepInception3, self).__init__(**kwargs)
 
         # load pretrained weights
-        self.load_state_dict(weights_path)
+        weights = torch.load(weights_path)
+        self.load_state_dict(weights)
 
         # prepare hooks to save features
         for layer_name in loi:
