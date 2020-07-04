@@ -26,7 +26,14 @@ def create_blueprint(cfg):
         image = Image.open(io.BytesIO(image.read()))
 
         # process
-        result = image
+        result = deep_dream(image,
+                            epochs=1,
+                            learning_rate=1,
+                            loi=['Mixed_5b', 'Mixed_6b'],
+                            n_inceptions=2,
+                            scale_factor=0.7,
+                            blend_factor=0.3,
+                            blur_radius=60)
         result = to_base64(result)
 
         # build response

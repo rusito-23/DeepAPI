@@ -35,13 +35,13 @@ def create_app():
     @app.errorhandler(Error)
     def error_handler(err):
         # custom errors
-        logger.error(err)
+        app.logger.error(err)
         return err.as_response().json()
 
     @app.errorhandler(Exception)
     def exception_handler(exc):
         # other exceptions
-        logger.error(exc)
+        app.logger.exception(exc)
         return Response(result_image=None, success=False,
                         message='An error occurred from the server side.')\
             .json()

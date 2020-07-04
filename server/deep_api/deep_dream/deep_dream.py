@@ -3,9 +3,96 @@ Deep Dream Algorithm.
 """
 
 import torch
+import torchvision
+import logging
+from torchvision import transforms as T
 from PIL import Image, ImageFilter
-from deep_dream.deep_inception import DeepInception3
-import deep_dream.deep_utils as utils
+
+logger = logging.getLogger()
+
+MEAN = [0.485, 0.456, 0.406]
+STD = [0.229, 0.224, 0.225]
+IMEAN = [-0.485/0.229, -0.456/0.224, -0.406/0.225]
+ISTD = [1/0.229, 1/0.224, 1/0.225]
+SIZE = 256
+
+
+def preprocess(image):
+    """
+    Preprocesses the image to be fed to the Deep Model Algorithm.
+    Resizes, normalizes the image and performs Pytorch Tensor Conversion.
+    """
+    transforms = T.Compose([
+        T.Resize(SIZE),
+        T.ToTensor(),
+        T.Normalize(mean=MEAN, std=STD)
+    ])
+    return transforms(image).unsqueeze(0).requires_grad_(True)
+
+
+def postprocess(tensor):
+    """
+    Processes the output for the Deep Dream Algorithm.
+    """
+    transforms = T.Compose([
+        T.Normalize(IMEAN, ISTD),
+        T.ToPILImage()
+    ])
+    return transforms(tensor)
+
+
+def clip(image):
+    """
+    Set the image pixel values between 0 and 1.
+    """
+    for c, (mean, std) in enumerate(zip(MEAN, STD)):
+        image[0, c] = torch.clamp(image[0, c], -mean/std, (1 - mean)/std)
+    return image
+
+
+def scaled(image, factor):
+    """
+    Resize the image to a given scale factor.
+    """
+    width = int(image.width * factor)
+    height = int(image.height * factor)
+    return image.resize((width, height))
+
+
+class DeepInception3(torchvision.models.Inception3):
+    """
+    Inception Net v3 Extension for Deep Dream.
+    Params:
+        - loi: layers of interest: names of the layers that will be saved
+                with hooks to get their outputs.
+        - weights_path: pretrained weights path
+        - **kwargs: same args as in torchvision.models.Inception3
+    """
+    features = []
+    hooks = []
+
+    def __init__(self, loi, weights_path, **kwargs):
+        super(DeepInception3, self).__init__(**kwargs)
+
+        # load pretrained weights
+        weights = torch.load(weights_path)
+        self.load_state_dict(weights)
+
+        # prepare hooks to save features
+        for layer_name in loi:
+            layer = dict(self.named_children())[layer_name]
+            layer_hook = layer.register_forward_hook(self.feature_hook)
+            self.hooks.append(layer_hook)
+
+    def feature_hook(self, module, _in, _out):
+        self.features.append(_out)
+
+    def remove(self):
+        [hook.remove() for hook in self.hooks]
+
+    def forward(self, x):
+        self.features = []
+        return super(DeepInception3, self).forward(x)
 
 
 class DeepDream:
@@ -17,6 +104,7 @@ class DeepDream:
         self.model = DeepInception3(loi=loi, weights_path=weights_path)
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(device)
+        logger.info('Deep Dream Class Initialized succesfully')
 
     def deep_dream_loss(self, model, target):
         """
@@ -25,7 +113,7 @@ class DeepDream:
         and uses the sum of the mean values of these features as loss.
         """
         # run the image through the net
-        _ = deep_dream(target)
+        _ = model(target)
 
         # get the loss
         losses = [torch.mean(feat) for feat in model.features]
@@ -42,14 +130,14 @@ class DeepDream:
         Passes the given image through the model and uses the
         Gradient Ascent Method to update the image.
         """
-        target = utils.preprocess(image).to(self.device)
+        target = preprocess(image).to(self.device)
         for _ in range(epochs):
             # reset gradient
             if target.grad is not None:
                 target.grad.zero_()
 
             # loss backward
-            loss = self.deep_dream_loss(deep_dream, target)
+            loss = self.deep_dream_loss(self.model, target)
             loss.backward(retain_graph=True)
 
             # gradient ascent step (standarizing the gradient)
@@ -58,7 +146,7 @@ class DeepDream:
             target.data = target.data + grad * learning_rate
 
             # clip pixel values
-            target.data = utils.clip(target.data)
+            target.data = clip(target.data)
         return target
 
     def create_inceptions(self,
@@ -77,10 +165,11 @@ class DeepDream:
             inception = inceptions[-1]
             inception = inception.filter(ImageFilter.GaussianBlur(blur_radius))
             inception = scaled(inception, scale_factor)
-            inceptions.append(blurred_scaled)
+            inceptions.append(inception)
         return inceptions
 
-    def __call__(self, source_image,
+    def __call__(self,
+                 image,
                  epochs=100,
                  learning_rate=1,
                  loi=['Mixed_5b', 'Mixed_6b'],
@@ -100,22 +189,27 @@ class DeepDream:
                                             n_inceptions,
                                             scale_factor,
                                             blur_radius)
+        logger.debug(f'Created {n_inceptions} inceptions')
 
         # run a step for each of these
+        dream = None
         for w, inception in enumerate(inceptions[::-1]):
-            if 'dream' not in vars() or 'dream' not in globals():
+            if dream is not None:
                 # upsample and blend last inception
                 dream = dream.resize(inception.size)
                 scale = Image.blend(inception, dream, blend_factor)
 
             # run the step
+            logger.debug(f'Running inception on sample {w}'
+                         f' with size: {inception.size}')
             learning_weight = w + 1
-            dream = self.dream_inception(model,
-                                         inception,
+            dream = self.dream_inception(inception,
+                                         epochs,
+                                         learning_rate,
                                          learning_weight)
 
             # re convert to PIL and save for the next it
             dream = dream.cpu().clone().detach().squeeze(0)
-            dream = utils.postprocess(dream)
+            dream = postprocess(dream)
 
         return dream
