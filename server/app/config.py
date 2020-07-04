@@ -52,7 +52,7 @@ class Config(BaseConfig):
     """ Flask config enhanced - `from_cfg` method. """
 
     def from_cfg(self, cfg):
-        self['ENVIRONMENT'] = cfg.ENV.lower()
+        self['ENV'] = cfg.ENV.lower()
         for key in cfg.SERVER_CONFIG:
             if key.isupper():
                 self[key] = cfg.SERVER_CONFIG[key]
