@@ -21,8 +21,8 @@ ENV_CONFIG:
         SECRET_KEY: very_fckn_secure 
 
 MODEL:
-    WEIGHTS_PATH: ./model/inception_v3_weights.pth
-    LOI: [Mixed_5b, Mixed_6b]
+    WEIGHTS_PATH: ./model/googlenet_weights.pth
+    LOI: [inception5a, inception5b]
 
 LOG:
     version: 1

@@ -59,20 +59,20 @@ def scaled(image, factor):
     return image.resize((width, height))
 
 
-class DeepInception3(torchvision.models.Inception3):
+class DeepGoogLeNet(torchvision.models.GoogLeNet):
     """
-    Inception Net v3 Extension for Deep Dream.
+    GoogLeNet Extension for Deep Dream.
     Params:
         - loi: layers of interest: names of the layers that will be saved
                 with hooks to get their outputs.
         - weights_path: pretrained weights path
-        - **kwargs: same args as in torchvision.models.Inception3
+        - **kwargs: same args as in torchvision.models.GoogLeNet
     """
     features = []
     hooks = []
 
     def __init__(self, loi, weights_path, **kwargs):
-        super(DeepInception3, self).__init__(**kwargs)
+        super(DeepGoogLeNet, self).__init__(**kwargs)
 
         # load pretrained weights
         weights = torch.load(weights_path)
@@ -92,7 +92,7 @@ class DeepInception3(torchvision.models.Inception3):
 
     def forward(self, x):
         self.features = []
-        return super(DeepInception3, self).forward(x)
+        return super(DeepGoogLeNet, self).forward(x)
 
 
 class DeepDream:
@@ -101,7 +101,7 @@ class DeepDream:
     """
 
     def __init__(self, loi, weights_path):
-        self.model = DeepInception3(loi=loi, weights_path=weights_path)
+        self.model = DeepGoogLeNet(loi=loi, weights_path=weights_path)
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(device)
         logger.info('Deep Dream Class Initialized succesfully')
