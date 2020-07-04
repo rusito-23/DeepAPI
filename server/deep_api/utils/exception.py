@@ -3,8 +3,6 @@ Base Exception.
 Declare custom exceptions for better error handling.
 """
 
-from utils.response import Response
-
 
 class Error(Exception):
     def __init__(self, message, exc):
@@ -17,9 +15,6 @@ class Error(Exception):
     def log(self):
         return self.__str__()
 
-    def as_response(self):
-        return Response(result_image=None, success=False, message=self.message)
-
 
 class ModelInitializationError(Error):
     def __init__(self, exc):
@@ -27,10 +22,10 @@ class ModelInitializationError(Error):
             'An error ocurred while initializing the model.', exc)
 
 
-class ProcessingError(Error):
+class DreamError(Error):
     def __init__(self):
         super(ProcessingError, self).__init__(
-            'An error ocurred while processing the input.', exc)
+            'An error ocurred while running the Deep Dream algorithm.', exc)
 
 
 class PreProcessingError(Error):

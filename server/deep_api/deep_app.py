@@ -6,7 +6,6 @@ import logging
 import logging.config
 from config import CFG, Flask
 from utils.exception import Error
-from utils.response import Response
 from routes import (
     dream
 )
@@ -35,15 +34,13 @@ def create_app():
     @app.errorhandler(Error)
     def error_handler(err):
         # custom errors
-        app.logger.error(err)
-        return err.as_response().json()
+        app.logger.exception(err)
+        return (f'Error: {err.message}', 500)
 
     @app.errorhandler(Exception)
     def exception_handler(exc):
         # other exceptions
         app.logger.exception(exc)
-        return Response(result_image=None, success=False,
-                        message='An error occurred from the server side.')\
-            .json()
+        return ('Unknown Error', 500)
 
     return app

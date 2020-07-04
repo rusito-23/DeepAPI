@@ -3,11 +3,9 @@ Flask App Routes.
 """
 
 import io
-from flask import Blueprint, request
+from flask import Blueprint, request, send_file
 from PIL import Image
-from deep_dream.deep_dream import DeepDream
-from utils.base64 import to_base64
-from utils.response import Response
+from algorithms.deep_dream import DeepDream
 
 
 def create_blueprint(cfg):
@@ -25,12 +23,14 @@ def create_blueprint(cfg):
         image = request.files['image']
         image = Image.open(io.BytesIO(image.read()))
 
-        # process
+        # dream!
         result = deep_dream(image)
-        result = to_base64(result)
 
         # build response
-        res = Response(result_image=result)
-        return res.json()
+        result_bytes = io.BytesIO()
+        result.save(result_bytes, 'JPEG', quality=80)
+        result_bytes.seek(0)
+
+        return send_file(result_bytes, mimetype='image/jpeg')
 
     return bp
