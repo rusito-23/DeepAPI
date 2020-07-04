@@ -171,10 +171,10 @@ class DeepDream:
 
     def __call__(self,
                  image,
-                 epochs=100,
+                 epochs=10,
                  learning_rate=1,
                  loi=['Mixed_5b', 'Mixed_6b'],
-                 n_inceptions=12,
+                 n_inceptions=5,
                  scale_factor=0.7,
                  blend_factor=0.3,
                  blur_radius=60):
