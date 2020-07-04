@@ -8,13 +8,13 @@ import logging
 from torchvision import transforms as T
 from PIL import Image, ImageFilter
 
-logger = logging.getLogger()
+logger = logging.getLogger('DEEP_API')
 
 MEAN = [0.485, 0.456, 0.406]
 STD = [0.229, 0.224, 0.225]
 IMEAN = [-0.485/0.229, -0.456/0.224, -0.406/0.225]
 ISTD = [1/0.229, 1/0.224, 1/0.225]
-SIZE = 256
+SIZE = 512
 
 
 def preprocess(image):
@@ -23,7 +23,7 @@ def preprocess(image):
     Resizes, normalizes the image and performs Pytorch Tensor Conversion.
     """
     transforms = T.Compose([
-        T.Resize(SIZE),
+        T.Resize((SIZE, SIZE)),
         T.ToTensor(),
         T.Normalize(mean=MEAN, std=STD)
     ])
@@ -131,6 +131,7 @@ class DeepDream:
         Gradient Ascent Method to update the image.
         """
         target = preprocess(image).to(self.device)
+        logger.debug(f'Dream inception target with shape: {target.shape}')
         for _ in range(epochs):
             # reset gradient
             if target.grad is not None:
@@ -142,7 +143,7 @@ class DeepDream:
 
             # gradient ascent step (standarizing the gradient)
             grad = target.grad.data / (torch.std(target.grad.data) + 1e-8)
-            learning_rate = learning_rate / learning_weigh
+            learning_rate = learning_rate / learning_weight
             target.data = target.data + grad * learning_rate
 
             # clip pixel values

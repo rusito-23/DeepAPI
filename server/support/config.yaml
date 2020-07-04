@@ -30,17 +30,26 @@ LOG:
     formatters:
         standard:
             format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        color_format:
+            format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            (): utils.log_extension.ColoredFormatter
+            use_color: true
     handlers:
         console_handler:
-            formatter: standard
+            formatter: color_format 
             level: DEBUG
-            class: 'logging.StreamHandler'
-            stream: 'ext://sys.stdout'
+            class: logging.StreamHandler
+            stream: ext://sys.stdout
         file_handler:
             formatter: standard
             level: INFO
-            class: 'logging.handlers.RotatingFileHandler'
-            filename: './out/deep_api.log'
+            class: logging.handlers.RotatingFileHandler
+            filename: ./out/deep_api.log
+
     loggers:
-        '':
-            handlers: [console_handler, file_handler] 
+        DEEP_API:
+            level: DEBUG
+            handlers: [console_handler, file_handler]
+        werkzeug:
+            level: DEBUG
+            handlers: [console_handler, file_handler]
