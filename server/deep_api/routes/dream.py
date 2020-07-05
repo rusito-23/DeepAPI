@@ -12,8 +12,7 @@ def create_blueprint(cfg):
     """ setup """
 
     bp = Blueprint('background', cfg.NAME)
-    deep_dream = DeepDream(loi=cfg.MODEL.LOI,
-                           weights_path=cfg.MODEL.WEIGHTS_PATH)
+    deep_dream = DeepDream(cfg=cfg.ALGORITHM)
 
     """ routes """
 
