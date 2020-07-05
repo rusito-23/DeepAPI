@@ -5,7 +5,7 @@ Flask App Routes.
 import io
 from flask import Blueprint, request, send_file
 from PIL import Image
-from algorithms.deep_dream import DeepDream
+from algorithm.deep_dream import DeepDream
 
 
 def create_blueprint(cfg):
