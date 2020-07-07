@@ -16,14 +16,14 @@ def create_blueprint(cfg):
 
     """ routes """
 
-    @bp.route('/deep/dream', methods=['POST'])
-    def background_replacement():
+    @bp.route('/deep/dream/<string:style_name>', methods=['POST'])
+    def background_replacement(style_name):
         # read image
         image = request.files['image']
         image = Image.open(io.BytesIO(image.read()))
 
         # dream!
-        result = deep_dream(image)
+        result = deep_dream(image, style_name)
 
         # build response
         result_bytes = io.BytesIO()

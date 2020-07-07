@@ -2,17 +2,12 @@
 
 Flask application to run the Deep Dream Algorithm through an API.
 
-## Root Folder
-
-The root folder is `server`.
-All commands stated below should be executed in this folder. 
+![Trippy Bunny](demo/trippy.jpeg)
 
 ## Requirements
 
-The pip requirements can be found in the [support files folder](server/support) and installed using:
-
 ```
-pip install -r support/requirements.txt
+pip install -r requirements.txt
 ```
 
 Another important requirement is to download the [pretrained GoogLeNet weigths for PyTorch](https://download.pytorch.org/models/googlenet-1378be20.pth). This can be done by running the following command, which download and prepares the weights:
@@ -26,7 +21,7 @@ Another important requirement is to download the [pretrained GoogLeNet weigths f
 ### uwsgi
 
 ```
-uwsgi --ini support/uwsgi.ini 
+uwsgi --ini uwsgi.ini 
 ```
 
 ### development

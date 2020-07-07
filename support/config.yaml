@@ -22,13 +22,16 @@ ENV_CONFIG:
 
 ALGORITHM:
     WEIGHTS_PATH: ./model/googlenet_weights.pth
-    LOI: [inception4a, inception4b]
-    EPOCHS: 50
-    LEARNING_RATE: 0.5
-    N_INCEPTIONS: 10
-    SCALE_FACTOR: 0.7
-    BLEND_FACTOR: 0.4
-    BLUR_RADIUS: 90
+    STYLES:
+        trippy:
+            loi: [inception4a, inception4b]
+            epochs: 23
+            learning_rate: 0.5
+            n_inceptions: 5
+            zoom_factor: 0.8
+            blend_factor: 0.4
+            blur_radius: 60
+            size: 256
 
 LOG:
     version: 1

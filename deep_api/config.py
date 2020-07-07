@@ -1,7 +1,5 @@
 """
 Configuration classes.
-If used as script, will pretty print the CFG content
-using the --config-file param.
 Most of the script was taken from:
     https://gist.github.com/mattupstate/2046115
 Classes:
@@ -13,7 +11,6 @@ Classes:
 import os
 import yaml
 import argparse
-import beeprint
 from flask import Flask as BaseFlask, Config as BaseConfig
 from utils.exception import ConfigError
 
@@ -24,8 +21,24 @@ class CfgNode:
         self.__dict__.update(d)
 
 
+class StyleCfg(CfgNode):
+    """ Algorithm Style Configuration """
+    pass
+
+
+class AlgoCfg(CfgNode):
+    """ Model Configuration """
+    def __init__(self, d):
+        super(AlgoCfg, self).__init__(d)
+
+        # load alogrithm style configuration
+        self.styles = {}
+        for k, v in self.STYLES.items():
+            self.styles[k] = StyleCfg(v)
+
+
 class CFG(CfgNode):
-    """ Configuration Class """
+    """ General Configuration """
     levels = {
         'DEVELOPMENT': 'DEBUG',
         'STAGING': 'INFO',
@@ -43,7 +56,7 @@ class CFG(CfgNode):
         self.ENV_CONFIG = cfg['ENV_CONFIG'][self.FLASK_ENV]
 
         # load model config
-        self.ALGORITHM = cfg['ALGORITHM']
+        self.ALGORITHM = AlgoCfg(cfg['ALGORITHM'])
 
         # setup log config
         self.LOG = cfg['LOG']
@@ -79,12 +92,3 @@ class Flask(BaseFlask):
         if instance_relative:
             root_path = self.instance_path
         return Config(root_path, self.default_config)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config-file',
-                        default='./support/config.yaml')
-    args = parser.parse_args()
-    cfg = CFG(args.config_file)
-    beerprint.pp(cfg)

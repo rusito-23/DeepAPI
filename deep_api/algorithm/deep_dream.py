@@ -7,6 +7,7 @@ import torchvision
 import logging
 from torchvision import transforms as T
 from PIL import Image, ImageFilter
+from utils.exception import UnknownStyle
 
 logger = logging.getLogger('DEEP_API')
 
@@ -14,7 +15,6 @@ MEAN = [0.485, 0.456, 0.406]
 STD = [0.229, 0.224, 0.225]
 IMEAN = [-0.485/0.229, -0.456/0.224, -0.406/0.225]
 ISTD = [1/0.229, 1/0.224, 1/0.225]
-SIZE = 512
 
 
 def preprocess(image):
@@ -49,38 +49,32 @@ def clip(image):
     return image
 
 
-def scaled(image, factor):
+def zoomed(image, factor):
     """
-    Resize the image to a given scale factor.
+    Zoom the image with a given factor
     """
-    width = int(image.width * factor)
-    height = int(image.height * factor)
-    return image.resize((width, height))
+    w, h = image.size
+    w1, h1 = w * factor, h * factor
+    y, x = (h - h1) / 2.0, (w - w1) / 2.0
+    zoomed = image.crop((x, y, w1, h1))
+    return zoomed.resize((w, h))
 
 
 class DeepGoogLeNet(torchvision.models.GoogLeNet):
     """
     GoogLeNet Extension for Deep Dream.
-    Params:
-        - cfg: configuration class
-            takes LOI (layers of interest) and weights_path from cfg.
-        - **kwargs: same args as in torchvision.models.GoogLeNet
     """
     features = []
     hooks = []
 
-    def __init__(self, cfg, **kwargs):
+    def __init__(self, weights_path, **kwargs):
         super(DeepGoogLeNet, self).__init__(**kwargs)
-
-        # cfg params
-        loi = cfg['LOI']
-        weights_path = cfg['WEIGHTS_PATH']
-
         # load pretrained weights
-        weights = torch.load(weights_path)
-        self.load_state_dict(weights)
+        self.load_state_dict(torch.load(weights_path))
         self.eval()
 
+    def set_loi(self, loi):
+        self.features, self.hooks = [], []
         # prepare hooks to save features
         for layer_name in loi:
             layer = dict(self.named_children())[layer_name]
@@ -104,8 +98,8 @@ class DeepDream:
     """
 
     def __init__(self, cfg):
-        self.__dict__.update(cfg)
-        self.model = DeepGoogLeNet(cfg)
+        self.model = DeepGoogLeNet(cfg.WEIGHTS_PATH)
+        self.styles = cfg.styles
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(device)
         logger.info('Deep Dream Class Initialized succesfully')
@@ -124,7 +118,7 @@ class DeepDream:
         loss = torch.stack(losses, axis=0).sum()
         return loss
 
-    def dream_inception(self, image, learning_weight):
+    def dream_inception(self, image, style, learning_rate):
         """
         Deep Dream Inception.
         Passes the given image through the model and uses the
@@ -132,7 +126,7 @@ class DeepDream:
         """
         target = preprocess(image).to(self.device)
         logger.debug(f'Dream inception target with shape: {target.shape}')
-        for _ in range(self.EPOCHS):
+        for _ in range(style.epochs):
             # reset gradient
             if target.grad is not None:
                 target.grad.zero_()
@@ -143,60 +137,66 @@ class DeepDream:
 
             # gradient ascent step (standarizing the gradient)
             grad = target.grad.data / (torch.std(target.grad.data) + 1e-8)
-            learning_rate = self.LEARNING_RATE / learning_weight
             target.data = target.data + grad * learning_rate
 
             # clip pixel values
             target.data = clip(target.data)
         return target
 
-    def create_inceptions(self, image):
+    def create_inceptions(self, image, style):
         """
         Creates the deep dream inceptions given the original image.
         In order to get the best result for the Deep Dream Algorithm,
         we need to create different samples, using the original image
-        downscaled and blured.
+        zoomed and blured.
         """
         inceptions = [image]
-        for i in range(self.N_INCEPTIONS - 1):
+        for i in range(style.n_inceptions - 1):
             inception = inceptions[-1]
-            imfilter = ImageFilter.GaussianBlur(self.BLUR_RADIUS)
+            imfilter = ImageFilter.GaussianBlur(style.blur_radius)
             inception = inception.filter(imfilter)
-            inception = scaled(inception, self.SCALE_FACTOR)
+            inception = zoomed(inception, style.zoom_factor)
             inceptions.append(inception)
         return inceptions
 
-    def __call__(self, image):
+    def __call__(self, image, style_name):
         """
         This is the main call to perform the Deep Dream algorithm,
-        it creates the inceptions (original image downscaled and blured)
+        it creates the inceptions (original image zoomed and blured)
         and optimizes each of these running them through the model.
         Each inception is also blended with the following inception.
         """
 
+        # prepare style and model
+        if style_name not in self.styles:
+            raise UnknownStyle(style_name)
+
+        style = self.styles[style_name]
+        self.model.set_loi(style.loi)
+
         # prepare image
-        image = image.resize((SIZE, SIZE))
+        original_size = image.size
+        image = image.resize((style.size, style.size))
 
         # create inceptions
-        inceptions = self.create_inceptions(image)
-        logger.debug(f'Created {self.N_INCEPTIONS} inceptions')
+        inceptions = self.create_inceptions(image, style)
+        logger.debug(f'Created {style.n_inceptions} inceptions')
 
         # run a step for each of these
         dream = None
         for w, inception in enumerate(inceptions[::-1]):
             if dream is not None:
                 # upsample and blend last inception
-                dream = dream.resize(inception.size)
-                scale = Image.blend(inception, dream, self.BLEND_FACTOR)
+                scale = Image.blend(inception, dream, style.blend_factor)
 
             # run the step
             logger.debug(f'Running inception on sample {w}'
                          f' with size: {inception.size}')
-            learning_weight = w + 1
-            dream = self.dream_inception(inception, learning_weight)
+            learning_rate = style.learning_rate / (w + 1)
+            dream = self.dream_inception(inception, style, learning_rate)
 
             # re convert to PIL and save for the next it
             dream = dream.cpu().clone().detach().squeeze(0)
             dream = postprocess(dream)
 
-        return dream
+        return dream.resize(original_size)

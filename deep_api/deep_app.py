@@ -35,7 +35,7 @@ def create_app():
     def error_handler(err):
         # custom errors
         app.logger.exception(err)
-        return (f'Error: {err.message}', 500)
+        return err.as_res()
 
     @app.errorhandler(Exception)
     def exception_handler(exc):
