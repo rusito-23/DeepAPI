@@ -26,14 +26,12 @@ class StyleCfg(CfgNode):
     pass
 
 
-class AlgoCfg(CfgNode):
-    """ Model Configuration """
-    def __init__(self, d):
-        super(AlgoCfg, self).__init__(d)
-
+class StylesCfg():
+    """ Styles List Configuration """
+    def __init__(self, styles):
         # load alogrithm style configuration
         self.styles = {}
-        for k, v in self.STYLES.items():
+        for k, v in styles.items():
             self.styles[k] = StyleCfg(v)
 
 
@@ -56,7 +54,7 @@ class CFG(CfgNode):
         self.ENV_CONFIG = cfg['ENV_CONFIG'][self.FLASK_ENV]
 
         # load model config
-        self.ALGORITHM = AlgoCfg(cfg['ALGORITHM'])
+        self.STYLES = StylesCfg(cfg['STYLES'])
 
         # setup log config
         self.LOG = cfg['LOG']

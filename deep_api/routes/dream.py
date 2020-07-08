@@ -12,7 +12,7 @@ def create_blueprint(cfg):
     """ setup """
 
     bp = Blueprint('background', cfg.NAME)
-    deep_dream = DeepDream(cfg=cfg.ALGORITHM)
+    deep_dream = DeepDream(cfg=cfg.STYLES)
 
     """ routes """
 

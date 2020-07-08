@@ -18,18 +18,16 @@ ENV_CONFIG:
         DEBUG: False
         DEVELOPMENT: False
 
-ALGORITHM:
-    WEIGHTS_PATH: ./model/googlenet_weights.pth
-    STYLES:
-        trippy:
-            loi: [inception4a, inception4b]
-            epochs: 23
-            learning_rate: 0.5
-            n_inceptions: 5
-            zoom_factor: 0.8
-            blend_factor: 0.4
-            blur_radius: 60
-            size: 256
+STYLES:
+    trippy:
+        loi: [inception4a, inception4b]
+        epochs: 23
+        learning_rate: 0.5
+        n_inceptions: 5
+        zoom_factor: 0.8
+        blend_factor: 0.4
+        blur_radius: 60
+        size: 256
 
 LOG:
     version: 1

@@ -8,6 +8,7 @@ import logging
 from torchvision import transforms as T
 from PIL import Image, ImageFilter
 from utils.exception import UnknownStyle
+from torch.hub import load_state_dict_from_url
 
 logger = logging.getLogger('DEEP_API')
 
@@ -15,6 +16,7 @@ MEAN = [0.485, 0.456, 0.406]
 STD = [0.229, 0.224, 0.225]
 IMEAN = [-0.485/0.229, -0.456/0.224, -0.406/0.225]
 ISTD = [1/0.229, 1/0.224, 1/0.225]
+WEIGHTS_URL = 'https://download.pytorch.org/models/googlenet-1378be20.pth'
 
 
 def preprocess(image):
@@ -67,10 +69,11 @@ class DeepGoogLeNet(torchvision.models.GoogLeNet):
     features = []
     hooks = []
 
-    def __init__(self, weights_path, **kwargs):
+    def __init__(self, **kwargs):
         super(DeepGoogLeNet, self).__init__(**kwargs)
         # load pretrained weights
-        self.load_state_dict(torch.load(weights_path))
+        state_dict = load_state_dict_from_url(WEIGHTS_URL, progress=False)
+        self.load_state_dict(state_dict)
         self.eval()
 
     def set_loi(self, loi):
@@ -98,7 +101,7 @@ class DeepDream:
     """
 
     def __init__(self, cfg):
-        self.model = DeepGoogLeNet(cfg.WEIGHTS_PATH)
+        self.model = DeepGoogLeNet()
         self.styles = cfg.styles
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(device)
