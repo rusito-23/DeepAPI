@@ -17,7 +17,7 @@ class DeepGoogLeNet(torchvision.models.GoogLeNet):
     the partial outputs into the `features` array.
     Parameters:
         - loi:
-            Layers Of Interest - the first n layers to save hooks
+            Layers Of Interest - pair(a, b) with the layer indexes to lookup
     """
     features = []
     hooks = []
@@ -29,19 +29,20 @@ class DeepGoogLeNet(torchvision.models.GoogLeNet):
         self.load_state_dict(state_dict)
 
         # loi validation
-        if loi <= 0 or loi > 16:
+        la, lb = loi
+        if lb <= 0 or lb > 16:
             raise ModelInitializationError()
 
         # prepare layers
         named_children = dict(self.named_children())
-        layer_names = list(named_children.keys())[:loi]
+        layer_names = list(named_children.keys())[:lb]
         layers = [named_children[name] for name in layer_names]
 
         # set layers and hooks
         self.features = []
         self.layers = nn.Sequential(*layers)
         self.hooks = [layer.register_forward_hook(self.feature_hook)
-                      for layer in self.layers]
+                      for layer in self.layers[la:lb]]
 
     def feature_hook(self, module, _in, _out):
         self.features.append(_out)
