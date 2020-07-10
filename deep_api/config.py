@@ -54,7 +54,7 @@ class CFG(CfgNode):
         self.ENV_CONFIG = cfg['ENV_CONFIG'][self.FLASK_ENV]
 
         # load model config
-        self.STYLES = StylesCfg(cfg['STYLES'])
+        self.STYLES = StylesCfg(self._read_config(self.STYLES_FILE))
 
         # setup log config
         self.LOG = cfg['LOG']

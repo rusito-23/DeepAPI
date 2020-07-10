@@ -2,7 +2,9 @@
 Deep Dream Algorithm.
 """
 
+from time import time
 import torch
+from torch import nn
 import torchvision
 import logging
 from torchvision import transforms as T
@@ -51,38 +53,38 @@ def clip(image):
     return image
 
 
-def zoomed(image, factor):
-    """
-    Zoom the image with a given factor
-    """
-    w, h = image.size
-    w1, h1 = w * factor, h * factor
-    y, x = (h - h1) / 2.0, (w - w1) / 2.0
-    zoomed = image.crop((x, y, w1, h1))
-    return zoomed.resize((w, h))
-
-
 class DeepGoogLeNet(torchvision.models.GoogLeNet):
     """
-    GoogLeNet Extension for Deep Dream.
+    GoogLeNet Extension to save hooks for the Deep Dream Algorithm.
+    It will pass an input through a given number of layers and save
+    the partial outputs into the `features` array.
+    Parameters:
+        - loi:
+            Layers Of Interest - the first n layers to save hooks
     """
     features = []
     hooks = []
 
-    def __init__(self, **kwargs):
-        super(DeepGoogLeNet, self).__init__(**kwargs)
+    def __init__(self, loi):
+        super(DeepGoogLeNet, self).__init__()
+
         # load pretrained weights
         state_dict = load_state_dict_from_url(WEIGHTS_URL, progress=False)
         self.load_state_dict(state_dict)
-        self.eval()
 
-    def set_loi(self, loi):
-        self.features, self.hooks = [], []
-        # prepare hooks to save features
-        for layer_name in loi:
-            layer = dict(self.named_children())[layer_name]
-            layer_hook = layer.register_forward_hook(self.feature_hook)
-            self.hooks.append(layer_hook)
+        # check layers of interest
+        assert loi > 0, 'Inavlid loi, must be > 0'
+        assert loi <= 16, 'Invalid loi, only first 16 are available.'
+
+        # prepare layers
+        named_children = dict(self.named_children())
+        layer_names = list(named_children.keys())[:loi]
+        layers = [named_children[name] for name in layer_names]
+        self.layers = nn.Sequential(*layers)
+
+        # prepare hooks
+        for layer in self.layers:
+            self.hooks.append(layer.register_forward_hook(self.feature_hook))
 
     def feature_hook(self, module, _in, _out):
         self.features.append(_out)
@@ -92,7 +94,7 @@ class DeepGoogLeNet(torchvision.models.GoogLeNet):
 
     def forward(self, x):
         self.features = []
-        return super(DeepGoogLeNet, self).forward(x)
+        return self.layers(x)
 
 
 class DeepDream:
@@ -101,7 +103,6 @@ class DeepDream:
     """
 
     def __init__(self, cfg):
-        self.model = DeepGoogLeNet()
         self.styles = cfg.styles
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(device)
@@ -121,85 +122,49 @@ class DeepDream:
         loss = torch.stack(losses, axis=0).sum()
         return loss
 
-    def dream_inception(self, image, style, learning_rate):
+    def __call__(self, image, style_name):
         """
-        Deep Dream Inception.
+        Deep Dream Main Algorithm.
         Passes the given image through the model and uses the
         Gradient Ascent Method to update the image.
         """
+        # prepare style
+        if style_name not in self.styles:
+            raise UnknownStyle(style_name)
+        style = self.styles[style_name]
+        logger.info(f'Running deep dream algorithm using style: {style_name}')
+
+        # prepare model
+        model = DeepGoogLeNet(loi=style.loi)
+        model.eval()
+
+        # prepare input image
+        original_size = image.size
+        image = image.resize((style.size, style.size))
         target = preprocess(image).to(self.device)
-        logger.debug(f'Dream inception target with shape: {target.shape}')
-        for _ in range(style.epochs):
+
+        start = time()
+        for e in range(style.epochs):
             # reset gradient
             if target.grad is not None:
                 target.grad.zero_()
 
             # loss backward
-            loss = self.deep_dream_loss(self.model, target)
+            loss = self.deep_dream_loss(model, target)
             loss.backward(retain_graph=True)
 
             # gradient ascent step (standarizing the gradient)
             grad = target.grad.data / (torch.std(target.grad.data) + 1e-8)
-            target.data = target.data + grad * learning_rate
+            target.data = target.data + grad * style.learning_rate
 
             # clip pixel values
             target.data = clip(target.data)
-        return target
 
-    def create_inceptions(self, image, style):
-        """
-        Creates the deep dream inceptions given the original image.
-        In order to get the best result for the Deep Dream Algorithm,
-        we need to create different samples, using the original image
-        zoomed and blured.
-        """
-        inceptions = [image]
-        for i in range(style.n_inceptions - 1):
-            inception = inceptions[-1]
-            imfilter = ImageFilter.GaussianBlur(style.blur_radius)
-            inception = inception.filter(imfilter)
-            inception = zoomed(inception, style.zoom_factor)
-            inceptions.append(inception)
-        return inceptions
+            logger.debug(f'Epoch {e}/{style.epochs} '
+                         f'took: {time() - start:.2f}')
 
-    def __call__(self, image, style_name):
-        """
-        This is the main call to perform the Deep Dream algorithm,
-        it creates the inceptions (original image zoomed and blured)
-        and optimizes each of these running them through the model.
-        Each inception is also blended with the following inception.
-        """
-
-        # prepare style and model
-        if style_name not in self.styles:
-            raise UnknownStyle(style_name)
-
-        style = self.styles[style_name]
-        self.model.set_loi(style.loi)
-
-        # prepare image
-        original_size = image.size
-        image = image.resize((style.size, style.size))
-
-        # create inceptions
-        inceptions = self.create_inceptions(image, style)
-        logger.debug(f'Created {style.n_inceptions} inceptions')
-
-        # run a step for each of these
-        dream = None
-        for w, inception in enumerate(inceptions[::-1]):
-            if dream is not None:
-                # upsample and blend last inception
-                scale = Image.blend(inception, dream, style.blend_factor)
-
-            # run the step
-            logger.debug(f'Running inception on sample {w}'
-                         f' with size: {inception.size}')
-            learning_rate = style.learning_rate / (w + 1)
-            dream = self.dream_inception(inception, style, learning_rate)
-
-            # re convert to PIL and save for the next it
-            dream = dream.cpu().clone().detach().squeeze(0)
-            dream = postprocess(dream)
-
-        return dream.resize(original_size)
+        logger.info('Deep Dream with style: '
+                    f'{style_name} took: {time() - start:.2f}')
+        dream = target.cpu().clone().detach().squeeze(0)
+        dream = postprocess(dream).resize(original_size)
+        return dream

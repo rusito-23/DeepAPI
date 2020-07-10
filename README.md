@@ -2,7 +2,9 @@
 
 Flask application to run the Deep Dream Algorithm through an API.
 
-![Trippy Bunny](demo/trippy.jpeg)
+| Original | Painting | Trippy |
+| --- | --- | --- |
+| ![Bunny](demo/bunny.jpg) | ![Painting Bunny](demo/painting.jpeg) | ![Trippy Bunny](demo/trippy.jpeg) |
 
 ## Requirements
 

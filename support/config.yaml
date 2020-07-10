@@ -3,6 +3,7 @@ GENERAL:
     NAME: DEEP_API
     FLASK_ENV: DEVELOPMENT 
     OUTPUT_FOLDER: ./out
+    STYLES_FILE: ./support/styles.yaml
 
 ENV_CONFIG:
     COMMON: &common
