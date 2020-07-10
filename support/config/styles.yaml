@@ -1,0 +1,26 @@
+base: &base
+    epochs: 20
+    learning_rate: 0.1
+    size: 256
+
+painting:
+    <<: *base
+    loi: [0, 4]
+
+texture:
+    <<: *base
+    loi: [4, 8]
+
+trippy:
+    <<: *base
+    loi: [0, 8]
+
+barret:
+    <<: *base
+    learning_rate: 0.2
+    loi: [9, 10]
+
+whatever:
+    <<: *base
+    learning_rate: 0.2
+    loi: [11, 12]

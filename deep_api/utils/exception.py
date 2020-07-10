@@ -5,10 +5,6 @@ Declare custom exceptions for better error handling.
 
 
 class Error(Exception):
-    def __init__(self, message, code):
-        self.message = message
-        self.code = code
-
     def __str__(self):
         return f'[ ERROR ] CODE: {self.code}  MESSAGE: {self.message}'
 
