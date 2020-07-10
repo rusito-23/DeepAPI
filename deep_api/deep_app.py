@@ -4,7 +4,8 @@ Flask App.
 
 import logging
 import logging.config
-from config import CFG, Flask
+from cfg.flask_cfg import Flask
+from cfg.main_cfg import CFG
 from utils.exception import Error
 from routes import (
     dream
@@ -20,10 +21,6 @@ def create_app():
 
     app = Flask(cfg.NAME)
     app.config.from_cfg(cfg)
-
-    """ setup logging """
-
-    logging.config.dictConfig(cfg.LOG)
 
     """ blueprints """
 

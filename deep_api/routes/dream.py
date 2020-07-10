@@ -11,8 +11,8 @@ from algorithm.deep_dream import DeepDream
 def create_blueprint(cfg):
     """ setup """
 
-    bp = Blueprint('background', cfg.NAME)
-    deep_dream = DeepDream(cfg=cfg.STYLES)
+    bp = Blueprint('deep_dream', cfg.NAME)
+    deep_dream = DeepDream(cfg=cfg)
 
     """ routes """
 

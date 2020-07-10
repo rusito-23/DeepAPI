@@ -103,9 +103,10 @@ class DeepDream:
     """
 
     def __init__(self, cfg):
-        self.styles = cfg.styles
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.device = torch.device(device)
+        self.cfg = cfg
+        self.device = torch.device('cuda'
+                                   if torch.cuda.is_available()
+                                   else 'cpu')
         logger.info('Deep Dream Class Initialized succesfully')
 
     def deep_dream_loss(self, model, target):
@@ -129,9 +130,7 @@ class DeepDream:
         Gradient Ascent Method to update the image.
         """
         # prepare style
-        if style_name not in self.styles:
-            raise UnknownStyle(style_name)
-        style = self.styles[style_name]
+        style = self.cfg.STYLES_CFG[style_name]
         logger.info(f'Running deep dream algorithm using style: {style_name}')
 
         # prepare model

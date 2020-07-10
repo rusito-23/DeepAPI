@@ -1,0 +1,12 @@
+base: &base
+    epochs: 20
+    learning_rate: 0.1
+    size: 256
+
+painting:
+    <<: *base
+    loi: 4
+
+trippy:
+    <<: *base
+    loi: 8

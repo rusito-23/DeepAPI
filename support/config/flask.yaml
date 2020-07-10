@@ -1,0 +1,12 @@
+COMMON: &common
+    DEBUG: False
+
+DEVELOPMENT: &development
+    <<: *common
+    DEBUG: True
+
+STAGING: &staging
+    <<: *common
+
+PRODUCTION: &production
+    <<: *common
