@@ -1,6 +1,6 @@
 # Deep API Lint with PyCodeStyle and Test with UnitTest #
 
-name: PyCodeStyleLint
+name: Deep Workflow! 
 
 on:
   push:

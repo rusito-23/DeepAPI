@@ -2,11 +2,7 @@
 
 ## Intro
 
-This is a Deep Dream implementation using PyTorch with pretrained GoogLeNet weights. The algorithm is very simple and has been written to be fast. The speed depends on the selected style, using the **trippy** style as base, these are the current speeds:
-
-| MBP (i7 - 16GB) | Heroku |
-| --- | --- |
-| ~4s | ~20s |
+This is a Deep Dream implementation using PyTorch with pretrained GoogLeNet weights. The algorithm is very simple (doesn'b't use octaves) and aims to be fast. As of now, in a MBP with an i7 it runs in ~5s. The deployed version in Heroku tends to be slower and is not always available.
 
 Here are some of the available styles:
 
@@ -45,6 +41,10 @@ curl \
 ```
 
 The Heroku app is linked to this repo to perform continous deployment over the master branch.
+
+#### DISCLAIMER:
+
+Heroku requests have a timeout of 30s. This time should be enough to run the algorithm, but it's not consistent at all! So it won't work every time.
 
 ## Requirements
 
