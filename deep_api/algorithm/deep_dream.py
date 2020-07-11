@@ -9,9 +9,9 @@ from torch.hub import load_state_dict_from_url
 from algorithm.googlenet import DeepGoogLeNet, WEIGHTS_URL
 import algorithm.im_utils as utils
 from utils.exception import (
-        UnknownStyle,
-        PreProcessingError,
-        PostProcessingError
+    UnknownStyle,
+    PreProcessingError,
+    PostProcessingError
 )
 
 logger = logging.getLogger('DEEP_API')

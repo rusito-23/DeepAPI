@@ -6,6 +6,7 @@ import os
 import yaml
 import argparse
 import logging
+import logging.config
 from flask import Flask as BaseFlask, Config as BaseConfig
 from utils.exception import ConfigError
 from cfg.base_cfg import BaseCFG

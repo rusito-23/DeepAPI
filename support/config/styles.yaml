@@ -1,6 +1,6 @@
 base: &base
-    epochs: 20
-    learning_rate: 0.1
+    epochs: 10
+    learning_rate: 0.2
     size: 256
 
 painting:
@@ -17,10 +17,10 @@ trippy:
 
 barret:
     <<: *base
-    learning_rate: 0.2
+    learning_rate: 0.3
     loi: [9, 10]
 
 whatever:
     <<: *base
-    learning_rate: 0.2
+    learning_rate: 0.3
     loi: [11, 12]

@@ -30,7 +30,7 @@ class DeepGoogLeNet(torchvision.models.GoogLeNet):
 
         # loi validation
         la, lb = loi
-        if lb <= 0 or lb > 16:
+        if la < 0 or lb <= 0 or lb > 16:
             raise ModelInitializationError()
 
         # prepare layers
