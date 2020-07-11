@@ -2,7 +2,7 @@
 
 ## Intro
 
-This is a Deep Dream implementation using PyTorch with pretrained GoogLeNet weights. The algorithm is very simple (doesn'b't use octaves) and aims to be fast. As of now, in a MBP with an i7 it runs in ~5s. The deployed version in Heroku tends to be slower and is not always available.
+This is a Deep Dream implementation using PyTorch with pretrained GoogLeNet weights. The algorithm is very simple (doesn'b't use octaves) and aims to be fast. As of now, in a MBP with an i7 it runs in ~2s. The deployed version in Heroku tends to be slower and is not always available.
 
 Here are some of the available styles:
 
