@@ -40,11 +40,16 @@ curl \
     --output /path/to/output/image.jpeg
 ```
 
-The Heroku app is linked to this repo to perform continous deployment over the master branch.
-
 #### DISCLAIMER:
 
 Heroku requests have a timeout of 30s. This time should be enough to run the algorithm, but it's not consistent at all! So it won't work every time.
+
+## CI/CD
+
+The Github repo performs a workflow to make sure the Unit Tests are running and checks the PyCodeStyle.
+
+The Heroku app is linked to this repo to perform continous deployment over the master branch.
+
 
 ## Requirements
 
