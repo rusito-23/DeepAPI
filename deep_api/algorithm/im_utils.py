@@ -7,8 +7,8 @@ from torchvision import transforms as T
 
 MEAN = [0.485, 0.456, 0.406]
 STD = [0.229, 0.224, 0.225]
-IMEAN = [-0.485/0.229, -0.456/0.224, -0.406/0.225]
-ISTD = [1/0.229, 1/0.224, 1/0.225]
+IMEAN = [- m / s for m, s in zip(MEAN, STD)]
+ISTD = [1 / s for s in STD]
 
 
 def preprocess(image):
@@ -39,6 +39,6 @@ def clip(image):
     Set the image pixel values between 0 and 1.
     """
     for c, (mean, std) in enumerate(zip(MEAN, STD)):
-        image[0, c] = torch.clamp(image[0, c], -mean/std, (1 - mean)/std)
+        low, high = -mean / std, (1 - mean) / std
+        image[0, c] = torch.clamp(image[0, c], low, high)
     return image
-
