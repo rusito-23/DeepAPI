@@ -1,6 +1,7 @@
 NAME: DEEP_API
 OUTPUT_FOLDER: ./out
 FLASK_ENV: DEVELOPMENT
+ASSETS_PATH: ./assets
 STYLES_CFG: ./support/config/styles.yaml
 FLASK_CFG: ./support/config/flask.yaml
 LOG_CFG: ./support/config/logging.yaml

@@ -8,25 +8,16 @@ Here are some of the available styles:
 
 | Original | Painting |
 | --- | --- |
-| ![Bunny](demo/bunny.jpg) | ![Painting Bunny](demo/painting.jpeg) |
+| ![Bunny](assets/bunny.jpg) | ![Painting Bunny](assets/painting.jpeg) |
 | <center>**Mixed**</center> | <center>**Trippy**</center> |
-| ![Mixed Bunny](demo/texture.jpeg) | ![Trippy Bunny](demo/trippy.jpeg) |
+| ![Mixed Bunny](assets/texture.jpeg) | ![Trippy Bunny](assets/trippy.jpeg) |
 | <center>**Syd Barret**</center> | <center>**Whatever**</center> |
-| ![Syd Barret Bunny](demo/barret.jpeg) | ![Whatever Bunny](demo/whatever.jpeg) |
+| ![Syd Barrett Bunny](assets/barrett.jpeg) | ![Whatever Bunny](assets/whatever.jpeg) |
 
 
 ## API
 
-The only available call for now is: **http://deep-api-23.herokuapp.com/deep/dream/<style>**
-where *<style>* is one of:
-
-- painting
-- texture
-- trippy
-- barret
-- whatever
-
-No API Key is required.
+[API DOCS](API.md)
 
 ## Deployment
 

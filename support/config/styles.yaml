@@ -2,25 +2,37 @@ base: &base
     epochs: 10
     learning_rate: 0.2
     size: 256
+    description: 'Description'
 
 painting:
     <<: *base
+    name: 'Painting'
     loi: [0, 4]
 
 texture:
     <<: *base
+    name: 'Texture'
     loi: [4, 8]
 
 trippy:
     <<: *base
+    name: 'Trippy'
     loi: [0, 8]
 
-barret:
+barrett:
     <<: *base
+    name: 'Syd Barrett'
     learning_rate: 0.3
     loi: [9, 10]
 
 whatever:
     <<: *base
+    name: 'Yea Whatever'
     learning_rate: 0.3
     loi: [11, 12]
+
+dreamy:
+    <<: *base
+    name: 'Dreamy'
+    learning_rate: 0.3
+    loi: [14, 16]
