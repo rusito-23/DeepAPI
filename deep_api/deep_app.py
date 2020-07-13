@@ -8,7 +8,8 @@ from cfg.flask_cfg import Flask
 from cfg.main_cfg import CFG
 from utils.exception import Error
 from routes import (
-    dream
+    dream,
+    styles
 )
 
 
@@ -25,6 +26,7 @@ def create_app():
     """ blueprints """
 
     app.register_blueprint(dream.create_blueprint(cfg))
+    app.register_blueprint(styles.create_blueprint(cfg))
 
     """ handlers """
 
