@@ -10,9 +10,9 @@ from PIL import Image
 
 
 def im2base64(cfg, style_name):
+    """ Convert image to base64 string """
     im_path = os.path.join(cfg.ASSETS_PATH, style_name + '.jpeg')
-    image = Image.open(im_path).resize((32, 32))
-
+    image = Image.open(im_path).resize((128, 128))
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
@@ -35,7 +35,8 @@ def create_blueprint(cfg):
                 'icon': im2base64(cfg, style_name),
             }
             for style_name in cfg.STYLES_CFG.styles.keys()
-            if style_name != 'base']
+            if style_name != 'base'
+        ]
 
         return jsonify(styles)
 
