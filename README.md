@@ -15,9 +15,7 @@ Here are some of the available styles:
 | ![Syd Barrett Bunny](assets/barrett.jpeg) | ![Whatever Bunny](assets/whatever.jpeg) |
 
 
-## API
-
-[API DOCS](API.md)
+## [API DOCS](API.md)
 
 ## Deployment
 
