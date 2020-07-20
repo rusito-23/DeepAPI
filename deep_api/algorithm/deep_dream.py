@@ -5,8 +5,7 @@ Deep Dream Algorithm.
 from time import time
 import logging
 import torch
-from torch.hub import load_state_dict_from_url
-from algorithm.googlenet import DeepGoogLeNet, WEIGHTS_URL
+from algorithm.googlenet import DeepGoogLeNet
 import algorithm.im_utils as utils
 from utils.exception import (
     UnknownStyle,
@@ -27,7 +26,6 @@ class DeepDream:
         self.device = torch.device('cuda'
                                    if torch.cuda.is_available()
                                    else 'cpu')
-        _ = load_state_dict_from_url(WEIGHTS_URL, progress=False)
         logger.info('Deep Dream Class Initialized succesfully')
 
     def deep_dream_loss(self, model, target):

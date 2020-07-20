@@ -3,11 +3,12 @@ GoogLeNet Model Extension.
 """
 
 import torchvision
+import torch
 from torch import nn
 from torch.hub import load_state_dict_from_url
 from utils.exception import ModelInitializationError
 
-WEIGHTS_URL = 'https://download.pytorch.org/models/googlenet-1378be20.pth'
+WEIGHTS_PATH = './model/googlenet.pth'
 
 
 class DeepGoogLeNet(torchvision.models.GoogLeNet):
@@ -25,7 +26,7 @@ class DeepGoogLeNet(torchvision.models.GoogLeNet):
     def __init__(self, loi):
         super(DeepGoogLeNet, self).__init__()
         # load pretrained weights
-        state_dict = load_state_dict_from_url(WEIGHTS_URL, progress=False)
+        state_dict = torch.load(WEIGHTS_PATH)
         self.load_state_dict(state_dict)
 
         # loi validation
